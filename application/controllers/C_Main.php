@@ -34,11 +34,13 @@ class C_Main extends CI_Controller {
 		$this->load->model('Employee');
 
 		$data = $this->Employee->get($id);
+		if (isset($data[0]['DATE_OF_BIRTH'])) {
+			# code...
+			$origDate =  $data[0]['DATE_OF_BIRTH'];
+			$newDate = date("m/d/Y", strtotime($origDate));
 
-		$origDate =  $data[0]['DATE_OF_BIRTH'];
-		$newDate = date("m/d/Y", strtotime($origDate));
-
-		$data[0]['DATE_OF_BIRTH'] = $newDate;
+			$data[0]['DATE_OF_BIRTH'] = $newDate;
+		}
 		echo (json_encode($data));
 
 
@@ -56,7 +58,7 @@ class C_Main extends CI_Controller {
 	/*
 	* Generate PDF of all employee data
 	*/
-	public function downloadPDF()
+	public function generatePDF()
 	{
 
 		$this->load->model('Employee');
@@ -99,6 +101,14 @@ class C_Main extends CI_Controller {
 		fputcsv($handle, $data);
 
 		$data = $this->Employee->getAll();
+		$iterator = 0;
+		foreach ($data as $key) {
+
+			$origDate =  $key['DATE_OF_BIRTH'];
+			$newDate = date("d/m/Y", strtotime($origDate));
+			$data[$iterator]['DATE_OF_BIRTH'] = $newDate;
+			$iterator ++;
+		}
 		foreach ($data as $data) {
 			fputcsv($handle, $data);
 		}
@@ -145,8 +155,8 @@ class C_Main extends CI_Controller {
 				if (strtoupper($employee['GENDER']) == 'MALE' || strtoupper($employee['GENDER']) == 'FEMALE'){
 					$origDate =  $year.'-'.$month.'-'.$day ;
 					$employee['DATE_OF_BIRTH'] =  $origDate;
-					if (is_numeric( $employee['PHONE'])) {
-						if (!filter_var($employee['EMAIL'], FILTER_VALIDATE_EMAIL)) {
+					if (is_numeric($employee['PHONE'])) {
+						if (filter_var($employee['EMAIL'], FILTER_VALIDATE_EMAIL)) {
 							array_push($data, $employee);
 						}else{
 							$this->session->set_flashdata('error', 'Invalid email format. At record '.$iterator);
@@ -201,8 +211,8 @@ class C_Main extends CI_Controller {
 		$this->form_validation->set_rules('PLACE_OF_BIRTH', 'PLACE_OF_BIRTH', 'required|trim');
 		$this->form_validation->set_rules('RELIGION', 'RELIGION', 'trim|required');
 		$this->form_validation->set_rules('ADDRESS', 'ADDRESS', 'trim|required');
-		$this->form_validation->set_rules('PHONE', 'Phone', 'required|numeric');
-		$this->form_validation->set_rules('EMAIL', 'Email', 'required|valid_email|trim');
+		$this->form_validation->set_rules('PHONE', 'PHONE', 'required|numeric');
+		$this->form_validation->set_rules('EMAIL', 'EMAIL', 'required|valid_email|trim');
 		$this->form_validation->set_rules('NOTES', 'NOTES', 'trim|required');
 		if ($this->form_validation->run() == FALSE)
 		{
@@ -252,7 +262,7 @@ class C_Main extends CI_Controller {
 		$this->form_validation->set_rules('EDIT_PLACE_OF_BIRTH', 'PLACE_OF_BIRTH', 'required|trim');
 		$this->form_validation->set_rules('EDIT_RELIGION', 'RELIGION', 'trim|required');
 		$this->form_validation->set_rules('EDIT_ADDRESS', 'ADDRESS', 'trim|required');
-		$this->form_validation->set_rules('EDIT_PHONE', 'Name', 'required|numeric');
+		$this->form_validation->set_rules('EDIT_PHONE', 'Phone', 'required|numeric');
 		$this->form_validation->set_rules('EDIT_EMAIL', 'Email', 'required|valid_email|trim');
 		$this->form_validation->set_rules('EDIT_NOTES', 'NOTES', 'trim|required');
 		if ($this->form_validation->run() == FALSE)
@@ -281,7 +291,7 @@ class C_Main extends CI_Controller {
 			$result = $this->Employee->update($id,$data);
 			
 			if ($result) {
-				$this->session->set_flashdata('success', 'Successfully add a new employee data');
+				$this->session->set_flashdata('success', 'Successfully edit the employee data');
 			}else{
 				$this->session->set_flashdata('error', 'There is an error when adding a new employee');
 			}

@@ -47,21 +47,21 @@
 	});
 		
 		$('#date1 .input-group.date').datepicker({
-			 todayBtn: "linked",
-                keyboardNavigation: false,
-                forceParse: false,
-                calendarWeeks: true,
-                autoclose: true,
-                format: "dd/mm/yyyy"
-            });
+			todayBtn: "linked",
+			keyboardNavigation: false,
+			forceParse: false,
+			calendarWeeks: true,
+			autoclose: true,
+			format: "dd/mm/yyyy"
+		});
 
 		$('#EDIT_DATE_OF_BIRTH .input-group.date').datepicker({
-                todayBtn: "linked",
-                keyboardNavigation: false,
-                forceParse: false,
-                calendarWeeks: true,
-                autoclose: true,
-            });
+			todayBtn: "linked",
+			keyboardNavigation: false,
+			forceParse: false,
+			calendarWeeks: true,
+			autoclose: true,
+		});
 		$('.custom-file-input').on('change', function(e) {
 			var file = e.target.files[0];
 			var filesize = e.target.files[0].size;
@@ -96,7 +96,7 @@
 		 	function(data, status, xhr) {   // success callback function
 		 		$.each( data, function( i, item ) {
 		 			$('#EDIT_DATE_OF_BIRTH').datepicker("setDate", new Date(item.DATE_OF_BIRTH ));
-	   				
+
 		 			$('#EDIT_NAME').val(item.NAME);
 		 			$('#EDIT_GENDER').val(item.GENDER.toUpperCase());
 		 			$('#EDIT_DATE_OF_BIRTH').val(item.DATE_OF_BIRTH);
@@ -110,8 +110,29 @@
 		 	},'json');
 			
 		});
+		function setInputFilter(textbox, inputFilter) {
+			["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
+				textbox.addEventListener(event, function() {
+					if (inputFilter(this.value)) {
+						this.oldValue = this.value;
+						this.oldSelectionStart = this.selectionStart;
+						this.oldSelectionEnd = this.selectionEnd;
+					} else if (this.hasOwnProperty("oldValue")) {
+						this.value = this.oldValue;
+						this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+					}
+				});
+			});
+		}
 
-	});
+// Restrict input to digits and '.' by using a regular expression filter.
+setInputFilter(document.getElementById("EDIT_PHONE"), function(value) {
+	return /^\d*?\d*$/.test(value);
+});
+setInputFilter(document.getElementById("PHONE"), function(value) {
+	return /^\d*?\d*$/.test(value);
+});
+});
 </script>
 </body>
 

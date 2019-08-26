@@ -59,7 +59,8 @@
 										<th>RELIGION</th>
 										<th>PHONE</th>
 										<th>EMAIL</th>
-										<th colspan="2">ACTION</th>
+										<th >EDIT</th>
+										<th>DELETE</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -98,16 +99,17 @@
 							</a>
 
 							<a class="btn btn-outline btn-success" style="margin: 5px" href="#modal-csv" data-toggle="modal">
-								<i class="fa fa-upload"></i> Import from CSV
+								<i class="fa fa-upload"></i> Import CSV
 							</a> 
 							<a class="btn btn-outline btn-info" style="margin: 5px" href="<?php echo base_url(); ?>exportToCSV">
-								<i class="fa fa-download"></i> Export to CSV
+								<i class="fa fa-download"></i> Export CSV
 							</a>
-							<a class="btn btn-outline btn-warning" style="margin: 5px" href="<?php echo base_url(); ?>downloadPDF">
+							<a class="btn btn-outline btn-warning" style="margin: 5px" href="<?php echo base_url(); ?>generatePDF">
 								PDF
 							</a>
-							<a class="btn btn-outline btn-danger" style="margin: 5px" href="<?php echo base_url(); ?>deleteAll">
-								Clear All
+							<a class="btn btn-outline btn-danger" style="margin: 5px" href="<?php echo base_url(); ?>deleteAll"onclick="return confirm('Are you sure want to delete all data?')" >
+
+									Clear All
 							</a>
 							<h1 id="coba"></h1>
 						</div>

@@ -46,7 +46,7 @@ class Employee extends CI_Model {
 	public function insert_batch($data)
 	{
 
-		$result = $this->db->insert_batch('Employee', $data);
+		$result = $this->db->insert_batch('employee', $data);
 
 		if ($result) {
 			return true;
@@ -82,7 +82,7 @@ class Employee extends CI_Model {
 	public function delete($id)
 	{
 		$this->db->where('ID', $id);
-		$result  = $this->db->delete('Employee');
+		$result  = $this->db->delete('employee');
 
 		if ($result) {
 			return $result;
@@ -99,7 +99,7 @@ class Employee extends CI_Model {
 	 */
 	public function add($data)
 	{
-		$result = $this->db->insert('Employee', $data);
+		$result = $this->db->insert('employee', $data);
 
 		if ($result) {
 			return $result;
