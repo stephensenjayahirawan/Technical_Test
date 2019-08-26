@@ -258,7 +258,7 @@
 									<div class="row">
 										<h4>Please download <a href="<?php echo base_url(); ?>exampleCSV"> this file </a> as example.</h4>
 										<h4>The order of the csv shoul be :</h4>
-										<h4>ID, Name, Gender, Place of Birth, Date of Birth, Religion, Address, Phone, Email, Notes</h4>
+										<h4>ID, Name, Gender(MALE or FEMALE), Place of Birth, Date of Birth(dd/mm/yyyy), Religion, Address, Phone(numeric), Email, Notes</h4>
 									</div>
 									<div class="custom-file">
 										<input id="input_csv" name="csv_file" type="file" class="custom-file-input" required="1">

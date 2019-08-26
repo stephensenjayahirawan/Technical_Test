@@ -144,18 +144,28 @@ class C_Main extends CI_Controller {
 			if (checkdate($month, $day, $year)) {
 				if (strtoupper($employee['GENDER']) == 'MALE' || strtoupper($employee['GENDER']) == 'FEMALE'){
 					$origDate =  $year.'-'.$month.'-'.$day ;
-					// $newDate = date('Y-m-d', strtotime($origDate));
 					$employee['DATE_OF_BIRTH'] =  $origDate;
+					if (is_numeric( $employee['PHONE'])) {
+						if (!filter_var($employee['EMAIL'], FILTER_VALIDATE_EMAIL)) {
+							array_push($data, $employee);
+						}else{
+							$this->session->set_flashdata('error', 'Invalid email format. At record '.$iterator);
+							redirect('/','refresh');
+							break;
+						}
+					}else{
+						$this->session->set_flashdata('error', 'Wrong Phone value. Phone should only contain number. At record '.$iterator);
+						redirect('/','refresh');
+						break;
+					}
 					
-					array_push($data, $employee);
 				}else{
-					$this->session->set_flashdata('error', 'Wrong Gender value. Gender should be either MALE or FEMALE');
+					$this->session->set_flashdata('error', 'Wrong Gender value. Gender should be either MALE or FEMALE. At record '.$iterator);
 					redirect('/','refresh');
-
 					break;
 				}
 			}else{
-				$this->session->set_flashdata('error', 'Wrong date format or wrong date. Date format should be dd/mm/yyyy');
+				$this->session->set_flashdata('error', 'Wrong date format or wrong date. Date format should be dd/mm/yyyy. At record '.$iterator);
 				redirect('/','refresh');
 				break;
 			}

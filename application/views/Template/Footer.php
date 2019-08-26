@@ -71,6 +71,7 @@
 				case 'csv':
 				let fileName = $(this).val().split('\\').pop();
 				$(this).next('.custom-file-label').addClass("selected").html(fileName);
+				confirm('Make sure the date format is dd/mm/yyyy');
 				break;
 				default:
 				alert('Ekstensi file tidak sesuai! Ekstensi harus .csv');
