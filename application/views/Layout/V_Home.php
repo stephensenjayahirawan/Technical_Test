@@ -59,7 +59,7 @@
 										<th>RELIGION</th>
 										<th>PHONE</th>
 										<th>EMAIL</th>
-										<th>Action</th>
+										<th colspan="2">ACTION</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -79,7 +79,10 @@
 												<td><?php echo $key['EMAIL']; ?></td>
 												<td>
 													<a data-toggle="modal" class="EDIT_BUTTON" id_employee="<?php echo $key['ID']; ?>" href="#modal-edit" ><button class="btn btn-primary">EDIT</button></a>
+												</td>
+												<td>
 													<a href="<?php echo base_url(); ?>delete/<?php echo $key['ID'];?>"><button class="btn btn-danger" onclick="return confirm('Are you sure want to delete?')">DELETE</button></a>
+													
 												</td>
 											</tr>
 											<?php 
@@ -115,7 +118,7 @@
 	</div>
 </div>
 <!-- Modal for create a new employee -->
-<div id="modal-form" class="modal fade" aria-hidden="true">
+<div id="modal-form" class="modal fade" aria-hidden="true" tabindex="-1">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-body">
@@ -178,7 +181,7 @@
 				</div>
 			</div>
 			<!-- Modal for editting employee data -->
-			<div id="modal-edit" class="modal fade" aria-hidden="true">
+			<div id="modal-edit" class="modal fade" aria-hidden="true" tabindex="-1">
 				<div class="modal-dialog">
 					<div class="modal-content">
 						<div class="modal-body">
@@ -245,7 +248,7 @@
 				</div>
 			</div>
 			<!-- Modal for upload CSV -->
-			<div id="modal-csv" class="modal fade" aria-hidden="true">
+			<div id="modal-csv" class="modal fade" aria-hidden="true" tabindex="-1">
 				<div class="modal-dialog">
 					<div class="modal-content">
 						<div class="modal-body">

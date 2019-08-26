@@ -11,7 +11,7 @@
 
 <!-- Custom and plugin javascript -->
 
-<script src="<?php echo base_url(); ?>assets/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<script src="<?php echo base_url();?>assets/js/plugins/datapicker/bootstrap-datepicker.js"></script>
 <script src="<?php echo base_url();?>assets/js/inspinia.js"></script>
 <script src="<?php echo base_url();?>assets/js/plugins/pace/pace.min.js"></script>
 

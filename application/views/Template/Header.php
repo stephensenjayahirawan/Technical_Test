@@ -37,7 +37,7 @@
 						
 					</li>
 					<li>
-						<a href="<?php echo base_url();?>assets/layouts.html"><i class="fa fa-diamond"></i> <span class="nav-label">Layouts</span></a>
+						<a href=""><i class="fa fa-diamond"></i> <span class="nav-label">Layouts</span></a>
 					</li>
 				</ul>
 
