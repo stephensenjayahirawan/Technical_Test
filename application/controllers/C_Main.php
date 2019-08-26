@@ -5,101 +5,78 @@ class C_Main extends CI_Controller {
 
 	function __construct() {
 		parent::__construct();
-		$this->load->library('pdf');
 	}
 
+	/*
+	* Load homepage and show all employee data
+	*/
 	public function index()
 	{
 		$this->load->model('Employee');
 		
 		$data['Employee'] = $this->Employee->getAll();
 		
-
 		$this->load->view('Template/Header');
 		$this->load->view('Layout/V_Home',$data);
 		$this->load->view('Template/Footer');
 	}
 
-	public function get($id)
+	/*
+	* Show data of an employee in JSON
+	*/
+	public function get()
 	{
+		$id = $this->input->post('ID');
+
+		if (!isset($id)) {
+			redirect('/','refresh');
+		}
 		$this->load->model('Employee');
 
 		$data = $this->Employee->get($id);
-		echo json_encode($data);
+
+		$origDate =  $data[0]['DATE_OF_BIRTH'];
+		$newDate = date("m/d/Y", strtotime($origDate));
+
+		$data[0]['DATE_OF_BIRTH'] = $newDate;
+		echo (json_encode($data));
+
 
 	}
-
+	/*
+	* download example csv file
+	*/
+	public function exampleCSV()
+	{
+		$this->load->helper('download');
+		force_download(APPPATH.'..\assets\csv\Example.csv',NULL);
+		redirect('','refresh');
+		
+	}
+	/*
+	* Generate PDF of all employee data
+	*/
 	public function downloadPDF()
 	{
-		// $pdf = new FPDF('l','mm','A3');
-        // membuat halaman baru
-		// $pdf->AddPage('L');
-  //       // setting jenis font yang akan digunakan
-		// $pdf->SetFont('Arial','B',16);
-  //       // mencetak string 
-		// $pdf->Cell(190,7,'Employee Data',0,1,'C');
-		// $pdf->SetFont('Arial','B',12);
-        // Memberikan space kebawah agar tidak terlalu rapat
-		$pdf=new PDF_MC_Table('l','mm','A3');
-		$pdf->AddPage('L');
 
-		$pdf->SetFont('Arial','',14);
-		//Table with 20 rows and 4 columns
-		$pdf->SetWidths(array(10,50,25,40,40,30,40,35,60,70));
-		
-		// for($i=0;$i<20;$i++)
-		// 	$pdf->Output();
-		// $pdf->Cell(10,7,'',0,1);
-		// $pdf->SetFont('Arial','B',10);
-		// $pdf->Cell(10,12,'ID',1,0);
-		// $pdf->Cell(50,12,'NAME',1,0);
-		// $pdf->Cell(20,12,'GENDER',1,0);
-		// $pdf->Cell(20,12,'PLACE OF BIRTH',1,0);
-		// $pdf->Cell(20,12,'DATE OF BIRTH',1,0);
-		// $pdf->Cell(30,12,'RELIGION',1,0);
-		// $pdf->Cell(40,12,'ADDRESS',1,0);
-		// $pdf->Cell(40,12,'PHONE',1,0);
-		// $pdf->Cell(40,12,'EMAIL',1,0);
-		// $pdf->Cell(40,12,'NOTES',1,1);
-		// $pdf->SetFont('Arial','',10);
-		$pdf->Row(array('ID','NAME','GENDER','PLACE OF BIRTH','DATE OF BIRTH','RELIGION','ADDRESS','PHONE','EMAIL','NOTES'));
 		$this->load->model('Employee');
-		$data = $this->Employee->getAll();
-		foreach ($data as $key) {
-			$pdf->Row(array($key['ID'],$key['NAME'],$key['GENDER'],$key['PLACE_OF_BIRTH'],$key['DATE_OF_BIRTH'],$key['RELIGION'],$key['ADDRESS'],$key['PHONE'],$key['EMAIL'],$key['NOTES']));
-		// 	$pdf->Cell(10,6,$key['ID'],1,0);
-		// 	$pdf->Cell(50,6,$key['NAME'],1,0);
-		// 	$pdf->Cell(20,6,$key['GENDER'],1,0);
-		// 	$pdf->Cell(40,6,$key['PLACE_OF_BIRTH'],1,0);
-		// 	$pdf->Cell(32,6,$key['DATE_OF_BIRTH'],1,0);
-		// 	$pdf->Cell(30,6,$key['RELIGION'],1,0);
-		// 	$pdf->Cell(40,6,$key['ADDRESS'],1,0);
-		// 	$pdf->Cell(40,6,$key['PHONE'],1,0);
-		// 	$pdf->Cell(40,6,$key['EMAIL'],1,0);
-		// 	$pdf->MultiCell(40,6,$key['NOTES'],1,'L');
-		}
-			$pdf->Output();
+		$data['Employee'] =  $this->Employee->getAll();
 
-  //       // $mahasiswa = $this->db->get('mahasiswa')->result();
-  //       // foreach ($mahasiswa as $row){
-  //       //     $pdf->Cell(20,6,$row->nim,1,0);
-  //       //     $pdf->Cell(85,6,$row->nama_lengkap,1,0);
-  //       //     $pdf->Cell(27,6,$row->no_hp,1,0);
-  //       //     $pdf->Cell(25,6,$row->tanggal_lahir,1,1); 
-  //       // }
-		// $pdf->Output();
-        // $pdf->Output('D','Employee Data.pdf');
+		$this->load->library('Mydompdf');
 
+		$this->mydompdf->setPaper('A4', 'landscape');
+		$this->mydompdf->filename = "laporan-petanikode.pdf";
+		$this->mydompdf->load_view('layout/V_Report', $data);
+		return;
+		
 	}
 
+	/*
+	* Generate CSV file that contain all employee data
+	*/
 	public function exportToCSV()
 	{
 		$this->load->model('Employee');
-		// $this->load->dbutil();
-
-		// $query = $this->db->query("SELECT * FROM Employee");
-
-		// force_download( $this->dbutil->csv_from_result($query));
 
 		header("Content-type: application/csv");
 		header("Content-Disposition: attachment; filename=\"Employee".".csv\"");
@@ -129,18 +106,85 @@ class C_Main extends CI_Controller {
 		exit;
 		redirect('','refresh');
 	}
+
+	/*
+	* Delete all employee data and insert all employee data from csv
+	*/
+	public function importCSV()
+	{
+
+		$csv = $_FILES['csv_file']['tmp_name'];
+		$handle = fopen($csv,"r");
+		$row = fgetcsv($handle, 10000, ",");
+		$data = array();
+		$iterator = 0;
+		while (($row = fgetcsv($handle, 10000, ",")) != FALSE) //get row vales
+		{
+			$employee = array(
+				'ID' => $row[0],
+				'NAME' => $row[1],
+				'GENDER' => strtoupper($row[2]),
+				'PLACE_OF_BIRTH' => $row[3],
+				'DATE_OF_BIRTH' => $row[4],
+				'RELIGION' => $row[5],
+				'ADDRESS' => $row[6],
+				'PHONE' => $row[7],
+				'EMAIL' => $row[8],
+				'NOTES' => $row[9],
+			);
+			$iterator ++;
+			$explodedDate = explode('/', $employee['DATE_OF_BIRTH']);
+			$day = $explodedDate[0];
+			if (isset($explodedDate[1])) {
+				$month = $explodedDate[1];
+			}
+			if (isset($explodedDate[2])) {
+				$year = $explodedDate[2];
+			}
+			if (checkdate($month, $day, $year)) {
+				if (strtoupper($employee['GENDER']) == 'MALE' || strtoupper($employee['GENDER']) == 'FEMALE'){
+					$origDate =  $year.'-'.$month.'-'.$day ;
+					// $newDate = date('Y-m-d', strtotime($origDate));
+					$employee['DATE_OF_BIRTH'] =  $origDate;
+					
+					array_push($data, $employee);
+				}else{
+					$this->session->set_flashdata('error', 'Wrong Gender value. Gender should be either MALE or FEMALE');
+					redirect('/','refresh');
+
+					break;
+				}
+			}else{
+				$this->session->set_flashdata('error', 'Wrong date format or wrong date. Date format should be dd/mm/yyyy');
+				redirect('/','refresh');
+				break;
+			}
+
+		}
+		$this->load->model('Employee');
+		$result = $this->Employee->clearAll();
+		if ($result) {
+
+			$result = $this->Employee->insert_batch($data);
+			if ($result) {
+				$this->session->set_flashdata('success', 'Successfully upload csv and insert '.$iterator .' employee data');
+			}else{
+				$this->session->set_flashdata('error', 'There is an error when uploading csv or insert employee data');
+			}
+		} else {
+			$this->session->set_flashdata('error', 'There is an error when deleting all employee data');
+
+		}
+		redirect('/','refresh');
+		
+		return;
+		
+	}
+	/*
+	* Store employee data to database
+	*/
 	public function store()
 	{
-		// NAME
-		// GENDER
-		// PLACE_OF_BIRTH
-		// DATE_OF_BIRTH
-		// RELIGION
-		// ADDRESS
-		// PHONE
-		// EMAIL
-		// NOTES
-
 		$this->form_validation->set_rules('NAME', 'NAME', 'required|trim');
 		$this->form_validation->set_rules('GENDER', 'GENDER', 'required|trim|in_list[MALE,FEMALE]');
 		$this->form_validation->set_rules('DATE_OF_BIRTH', 'DATE_OF_BIRTH', 'required');
@@ -184,7 +228,11 @@ class C_Main extends CI_Controller {
 		
 		redirect('/','refresh');
 	}
+	/*
+	* Edit employee data with $id
 
+	* @param $id the id want to be updated
+	*/
 	public function edit($id)
 	{
 		
@@ -231,7 +279,11 @@ class C_Main extends CI_Controller {
 		
 		redirect('/','refresh');
 	}
+	/*
+	* Delete employee data with $id
 
+	* @param $id the employee id want to be deleted
+	*/
 	public function delete($id)
 	{
 		$this->load->model('Employee');
@@ -245,6 +297,9 @@ class C_Main extends CI_Controller {
 		redirect('/','refresh');
 	}
 
+	/*
+	* Delete all employee data 
+	*/
 	public function deleteAll()
 	{
 
@@ -267,107 +322,3 @@ class C_Main extends CI_Controller {
 
 /* End of file C_Main.php */
 /* Location: ./application/controllers/C_Main.php */
-require_once APPPATH.'/third_party/fpdf181/fpdf.php';
-class PDF_MC_Table extends FPDF
-{
-	var $widths;
-	var $aligns;
-
-	function SetWidths($w)
-	{
-    //Set the array of column widths
-		$this->widths=$w;
-	}
-
-	function SetAligns($a)
-	{
-    //Set the array of column alignments
-		$this->aligns=$a;
-	}
-
-	function Row($data)
-	{
-    //Calculate the height of the row
-		$nb=0;
-		for($i=0;$i<count($data);$i++)
-			$nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]));
-		$h=5*$nb;
-    //Issue a page break first if needed
-		$this->CheckPageBreak($h);
-    //Draw the cells of the row
-		for($i=0;$i<count($data);$i++)
-		{
-			$w=$this->widths[$i];
-			$a=isset($this->aligns[$i]) ? $this->aligns[$i] : 'L';
-        //Save the current position
-			$x=$this->GetX();
-			$y=$this->GetY();
-        //Draw the border
-			$this->Rect($x,$y,$w,$h);
-        //Print the text
-			$this->MultiCell($w,5,$data[$i],0,$a);
-        //Put the position to the right of the cell
-			$this->SetXY($x+$w,$y);
-		}
-    //Go to the next line
-		$this->Ln($h);
-	}
-
-	function CheckPageBreak($h)
-	{
-    //If the height h would cause an overflow, add a new page immediately
-		if($this->GetY()+$h>$this->PageBreakTrigger)
-			$this->AddPage($this->CurOrientation);
-	}
-
-	function NbLines($w,$txt)
-	{
-    //Computes the number of lines a MultiCell of width w will take
-		$cw=&$this->CurrentFont['cw'];
-		if($w==0)
-			$w=$this->w-$this->rMargin-$this->x;
-		$wmax=($w-2*$this->cMargin)*1000/$this->FontSize;
-		$s=str_replace("\r",'',$txt);
-		$nb=strlen($s);
-		if($nb>0 and $s[$nb-1]=="\n")
-			$nb--;
-		$sep=-1;
-		$i=0;
-		$j=0;
-		$l=0;
-		$nl=1;
-		while($i<$nb)
-		{
-			$c=$s[$i];
-			if($c=="\n")
-			{
-				$i++;
-				$sep=-1;
-				$j=$i;
-				$l=0;
-				$nl++;
-				continue;
-			}
-			if($c==' ')
-				$sep=$i;
-			$l+=$cw[$c];
-			if($l>$wmax)
-			{
-				if($sep==-1)
-				{
-					if($i==$j)
-						$i++;
-				}
-				else
-					$i=$sep+1;
-				$sep=-1;
-				$j=$i;
-				$l=0;
-				$nl++;
-			}
-			else
-				$i++;
-		}
-		return $nl;
-	}
-}

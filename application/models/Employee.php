@@ -2,7 +2,10 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Employee extends CI_Model {
+	/*
+	function for get all employee data in database.
 
+	*/
 	public function getAll()
 	{
 		$this->db->select('*');
@@ -16,6 +19,11 @@ class Employee extends CI_Model {
 		}
 		
 	}
+	/*
+	 * Get one employee data with ID 
+	 *
+	 * @param string $ID the id want to be find
+	 */
 	public function get($ID)
 	{
 		$this->db->select('*');
@@ -30,7 +38,29 @@ class Employee extends CI_Model {
 		}
 		
 	}
+	/*
+	 * Insert multiple data
+	 *
+	 * @param string $data array of employee data
+	 */
+	public function insert_batch($data)
+	{
 
+		$result = $this->db->insert_batch('Employee', $data);
+
+		if ($result) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+	/*
+	 * Change employee data with $id
+	 *
+	 * @param string $id the id want to change
+	 * @param array $data all data you have changed
+	 */
 	public function update($id, $data)
 	{
 		$this->db->where('ID', $id);
@@ -44,6 +74,11 @@ class Employee extends CI_Model {
 		
 	}	
 
+	/*
+	 * Delete employee data with $id
+	 *
+	 * @param string $id the id want to change
+	 */
 	public function delete($id)
 	{
 		$this->db->where('ID', $id);
@@ -57,6 +92,11 @@ class Employee extends CI_Model {
 		
 	}
 
+	/*
+	 * Create a new employee with $data.
+	 *
+	 * @param array $data all data you want to add 
+	 */
 	public function add($data)
 	{
 		$result = $this->db->insert('Employee', $data);
@@ -69,6 +109,10 @@ class Employee extends CI_Model {
 		
 	}
 
+	/*
+	 * Delete all employee data
+	 *
+	 */
 	public function clearAll()
 	{
 		$this->db->where('ID >', 0);
